@@ -24,7 +24,7 @@ from familyroot import secrets
 SECRET_KEY = secrets.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     'gallery',
     'django.contrib.admin',
     'sign_up',
+    'comment',
     #'debug_toolbar',
 )
 

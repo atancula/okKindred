@@ -9,12 +9,15 @@ import email_confirmation.views
 import family_tree.views
 import gallery.views
 import sign_up.views
+import comment.urls
 
 admin.autodiscover()
 
 handler403 = 'familyroot.views.handler403'
 
 urlpatterns = [
+    #Comments
+    url(r'^comment/', include(comment.urls)),
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^about/$', familyroot.views.about, name='about'),
