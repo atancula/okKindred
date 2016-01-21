@@ -84,7 +84,7 @@ class CommentsTestCase(TestCase): # pragma: no cover
 
     def test_get_comments(self):
         '''
-        Test that a comment can be posted
+        Test that a comment can be read
         '''
 
         content_type = ContentType.objects.get(model='person')
@@ -130,3 +130,60 @@ class CommentsTestCase(TestCase): # pragma: no cover
 
         self.assertEqual(404, response.status_code)
 
+
+    def test_delete_comment(self):
+        '''
+        Test that a comment can be deleted
+        '''
+
+        content_type = ContentType.objects.get(model='person')
+
+        comment = Comment(
+                    content_type = content_type,
+                    object_id = self.person.id,
+                    user = self.user,
+                    ip_address = '192.168.0.1',
+                    comment = 'demolition man')
+        comment.save()
+
+        self.client.login(email='anastasiasteele@example.com', password='50shades')
+
+        response = self.client.post('/comment/delete/',
+        {
+            'id': comment.id
+        })
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(b'OK', response.content)
+        self.assertEqual(0, Comment.objects.count())
+
+    def test_another_family_cannot_delete_comment(self):
+        '''
+        Test that a comment can not be deleted by another family
+        '''
+
+        content_type = ContentType.objects.get(model='person')
+
+        comment = Comment(
+                    content_type = content_type,
+                    object_id = self.person.id,
+                    user = self.user,
+                    ip_address = '192.168.0.1',
+                    comment = 'demolition man')
+        comment.save()
+
+        family = Family()
+        family.save()
+        user = User.objects.create_user(email='clara@example.com', password='fray', name='clara fray', family_id=family.id)
+        user.is_confirmed = True
+        user.save()
+
+        self.client.login(email='clara@example.com', password='fray')
+
+        response = self.client.post('/comment/delete/',
+        {
+            'id': comment.id
+        })
+
+        self.assertEqual(404, response.status_code)
+        self.assertEqual(comment.id, Comment.objects.get(id=comment.id).id)

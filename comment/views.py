@@ -118,3 +118,28 @@ def get_comments(request):
 
     return HttpResponse(json.dumps(data), content_type="application/json")
 
+
+@login_required
+@require_POST
+def delete_comment(request):
+    '''
+    deletes a comment
+    '''
+    data = request.POST.copy()
+
+    try:
+        # Look up the object we're trying to delete
+        id = data.get("id")
+        comment = Comment.objects.get(id=id)
+
+    except:
+        raise Http404
+
+    # Ensure user is from same family as object being commented on
+    if comment.family_id != request.user.family_id:
+        raise Http404
+
+    #Create the comment
+    comment.delete()
+
+    return HttpResponse("OK")
