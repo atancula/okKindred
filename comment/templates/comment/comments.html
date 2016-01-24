@@ -1,0 +1,47 @@
+{% load staticfiles %}
+{% load i18n %}
+
+
+<div id="comment_container" class="col-md-12" data-content_type="{{ content_type }}" data-object_id="{{ object_id }}">
+    <h3>{% trans "Comments" %}</h3>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+              <tbody id="comments_container">
+              </tbody>
+        </table>
+    </div>
+
+    <div id="comments_loading">
+        <img src="{% static "/img/ajax-loader.gif" %}"/> {% trans "Searching..." %}
+    </div>
+</div>
+
+<div class="col-md-12">
+    <form id="comment_form" role="form" data-toggle="validator">
+        <div class="form-group">
+            {% csrf_token %}
+            <input type="hidden" id="content_type" name="content_type" class="form-control" value="{{ content_type }}">
+            <input type="hidden" id="object_id" name="object_id" class="form-control" value="{{ object_id }}">
+            <textarea rows="2" id="comment_input_text" class="form-control" name="comment"></textarea>
+            <a href="#" id="comment_submit" class="btn btn-primary" style="cursor: pointer; pointer-events: all;">{% trans "Submit" %}</a>
+        </div>
+    </form>
+</div>
+
+<!--Templates-->
+{% verbatim %}
+<script id="comment_template" type="text/html">
+    <tr class="comment_individual">
+        <td class="comment_thumb">
+            <a href="/profile={{ person_id }}/">
+                <img class="comment_thumb" src="{{ image_url }}" alt="{{ person_name }}"/>
+            </a>
+        </td>
+        <td class="comment_text">
+            <p><strong><a href="/profile={{ person_id }}/">{{ person_name }}</a></strong> {{ comment }}</p>
+            <p class="comment_info">{{ when_posted }}</p>
+        </td>
+    </tr>
+</script>
+{% endverbatim %}

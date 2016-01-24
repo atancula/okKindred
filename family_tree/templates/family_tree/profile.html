@@ -218,9 +218,16 @@
             </div>
         </div>
     </div>
+
+    {% include "comment/comments.html" %}
+
 </div>
+
+
+
 {% endblock %}
 
 {% block extrascript %}
     <script src="{% static "js/family_tree/invite_person.js" %}"></script>
+    <script src="{% static "js/comment/comment.js" %}"></script>
 {% endblock %}

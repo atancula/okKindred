@@ -44,6 +44,8 @@ def profile(request, person_id = 0, person = None, requested_language = '', edit
                                     'show_locked': (True if request.user.id == person.user_id else False),
                                     'show_email_and_language' : show_email_and_language,
                                     'can_delete' : can_delete,
+                                    'content_type' : 'family_tree.person',
+                                    'object_id' : person.id,
                                 })
     else:
 
@@ -81,6 +83,8 @@ def profile(request, person_id = 0, person = None, requested_language = '', edit
                                     'invite_allowed' : invite_allowed,
                                     'show_photos': (True if Tag.objects.filter(person_id=person.id).count() > 0 else False),
                                     'has_email': (True if person.email else False),
+                                    'content_type' : 'family_tree.person',
+                                    'object_id' : person.id,
                                     })
 
 

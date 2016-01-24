@@ -3,10 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse
 from django.contrib.contenttypes.models import ContentType
 from django.views.decorators.http import require_POST, require_GET
+from django.utils import translation
 
 from comment.models import Comment
 
-import datetime
+from django.utils import timezone
+
 import json
 
 '''
@@ -14,13 +16,6 @@ Taken from https://github.com/django/django-contrib-comments/blob/master/django_
 '''
 
 ALLOWED_OBJECTS = ('person', 'image', 'gallery')
-
-date_handler = lambda obj: (
-    obj.isoformat()
-    if isinstance(obj, datetime.datetime)
-    or isinstance(obj, datetime.date)
-    else None
-)
 
 @login_required
 @require_POST
@@ -61,15 +56,17 @@ def post_comment(request):
 
     comment.save()
 
-    data = {
+    data = [];
+    data.append({
             'id': comment.id,
-            'name': comment.person.name,
+            'person_id' : comment.person.id,
+            'person_name': comment.person.name,
             'thumb': str(comment.person.small_thumbnail),
             'comment': comment.comment,
-            'creation_date': comment.creation_date
-           }
+            'creation_date': _get_when_posted(comment.creation_date, request.user.language)
+           });
 
-    return HttpResponse(json.dumps(data, default=date_handler), content_type="application/json")
+    return HttpResponse(json.dumps(data), content_type="application/json")
 
 @login_required
 @require_GET
@@ -102,17 +99,18 @@ def get_comments(request):
     if target.family_id != request.user.family_id:
         raise Http404
 
-    comments = Comment.objects.select_related('person').filter(content_type=content_type, object_id=object_id).order_by('-creation_date')
+    comments = Comment.objects.select_related('person').filter(content_type=content_type, object_id=object_id).order_by('creation_date')
 
     data = [];
 
     for comment in list(comments):
         data.append({
                     'id': comment.id,
-                    'name': comment.person.name,
+                    'person_id' : comment.person.id,
+                    'person_name': comment.person.name,
                     'thumb': str(comment.person.small_thumbnail),
                     'comment': comment.comment,
-                    'creation_date': str(comment.creation_date)
+                    'creation_date': _get_when_posted(comment.creation_date, request.user.language)
                    })
 
 
@@ -143,3 +141,62 @@ def delete_comment(request):
     comment.delete()
 
     return HttpResponse("OK")
+
+def _get_when_posted(creation_date, language):
+    '''
+    Returns a human readable format for when comment was posted
+    '''
+    translation.activate(language)
+
+    time_diff = (timezone.now() - creation_date)
+
+    # Less than a minute
+    if (time_diff.total_seconds() < 60):
+        return translation.ugettext('{0} seconds ago').format(int(time_diff.total_seconds()))
+
+    # Less than 2 minutes
+    if (time_diff.total_seconds() < 120):
+        return translation.ugettext('1 minute ago')
+
+    # Less than an hour
+    if (time_diff.total_seconds() < 3600):
+        return translation.ugettext('{0} minutes ago').format(int(time_diff.total_seconds() // 60))
+
+    # Less than 2 hours
+    if (time_diff.total_seconds() < 7200):
+        return translation.ugettext('1 hour ago')
+
+    # less than a day
+    if (time_diff.days < 1):
+        return translation.ugettext('{0} hours ago').format(int(time_diff.total_seconds() // 3600))
+
+    # less than two days
+    if (time_diff.days < 2):
+        return translation.ugettext('1 day ago')
+
+    # less than week
+    if (time_diff.days < 7):
+        return translation.ugettext('{0} days ago').format(time_diff.days)
+
+    # less two weeks
+    if (time_diff.days < 14):
+        return translation.ugettext('1 week ago')
+
+    # less than a month
+    if (time_diff.days < 31):
+        return translation.ugettext('{0} weeks ago').format(int(time_diff.days // 7))
+
+    # less than two months
+    if (time_diff.days < 60):
+        return translation.ugettext('1 month ago')
+
+    # less than a year
+    if (time_diff.days < 365):
+        return translation.ugettext('{0} months ago').format(int(time_diff.days // 30))
+
+    # less than two years
+    if (time_diff.days < 731):
+        return translation.ugettext('1 year ago')
+
+    # return number of years
+    return translation.ugettext('{0} years ago').format(int(time_diff.days // 365))

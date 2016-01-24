@@ -6,6 +6,10 @@ from custom_user.models import User
 from family_tree.models import Family, Person
 
 from comment.models import Comment
+from comment.views import _get_when_posted
+
+from django.utils import timezone
+import datetime
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class CommentsTestCase(TestCase): # pragma: no cover
@@ -59,7 +63,7 @@ class CommentsTestCase(TestCase): # pragma: no cover
         })
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual('hello!', response.json()['comment'])
+        self.assertEqual('hello!', response.json()[0]['comment'])
 
     def test_another_family_cannot_post_comment(self):
         '''
@@ -187,3 +191,24 @@ class CommentsTestCase(TestCase): # pragma: no cover
 
         self.assertEqual(404, response.status_code)
         self.assertEqual(comment.id, Comment.objects.get(id=comment.id).id)
+
+    def test_get_when_posted(self):
+        '''
+        Tests the different comment dates
+        '''
+
+        language = 'en';
+
+        self.assertEqual('10 seconds ago', _get_when_posted(timezone.now() - datetime.timedelta(seconds=10), language))
+        self.assertEqual('1 minute ago', _get_when_posted(timezone.now() - datetime.timedelta(seconds=80), language))
+        self.assertEqual('15 minutes ago', _get_when_posted(timezone.now() - datetime.timedelta(seconds=950), language))
+        self.assertEqual('1 hour ago', _get_when_posted(timezone.now() - datetime.timedelta(seconds=4000), language))
+        self.assertEqual('4 hours ago', _get_when_posted(timezone.now() - datetime.timedelta(hours=4.2), language))
+        self.assertEqual('1 day ago', _get_when_posted(timezone.now() - datetime.timedelta(days=1), language))
+        self.assertEqual('6 days ago', _get_when_posted(timezone.now() - datetime.timedelta(days=6), language))
+        self.assertEqual('1 week ago', _get_when_posted(timezone.now() - datetime.timedelta(days=10), language))
+        self.assertEqual('3 weeks ago', _get_when_posted(timezone.now() - datetime.timedelta(days=22), language))
+        self.assertEqual('1 month ago', _get_when_posted(timezone.now() - datetime.timedelta(days=40), language))
+        self.assertEqual('2 months ago', _get_when_posted(timezone.now() - datetime.timedelta(days=70), language))
+        self.assertEqual('1 year ago', _get_when_posted(timezone.now() - datetime.timedelta(days=400), language))
+        self.assertEqual('5 years ago', _get_when_posted(timezone.now() - datetime.timedelta(days=1900), language))
