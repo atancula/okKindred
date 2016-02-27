@@ -191,7 +191,11 @@
         <input type="hidden" id="tag_add_modal_y2" name="y2"/>
         <input type="hidden" id="tag_add_modal_person" name="person"/>
     </form>
+
+    {% include "comment/comments.html" %}
+
 </div>
+
 
 {% endblock %}
 
@@ -233,5 +237,6 @@
 <script src="{% static 'js/mapping/image_map.js' %}"></script>
 <script src="{% static 'js/gallery/image_tagging.js' %}"></script>
 <script src="{% static 'js/common/submit_disable.js' %}"></script>
+<script src="{% static 'js/comment/comment.js' %}"></script>
 
 {% endblock %}

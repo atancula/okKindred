@@ -18,7 +18,11 @@ $(document).ready(function(){
         }
     });
 
+    if (window.location.href.indexOf("#comments") > -1) {
+         $('html,body').animate({scrollTop:$("#comment_form").offset().top}, 1000);
+    }
 });
+
 
 function post_comment() {
 
@@ -32,7 +36,7 @@ function post_comment() {
     // serialize form data
     var serializedFormData = $("#comment_form").serialize();
 
-
+    $("#comment_input_text").val('');
 
     // Fire off the request
     request = $.ajax({
@@ -42,7 +46,9 @@ function post_comment() {
         data: serializedFormData,
         success: function (data) {
             append_new_comments(data);
-            $("#comment_input_text").val('');
+
+            // Ensure we don't jump to top
+            $('html,body').animate({scrollTop:$("#comment_form").offset().top}, 1000);
         }
     });
 }

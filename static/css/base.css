@@ -559,7 +559,8 @@ textarea {
 }
 
 .comment_text {
-
+    white-space: normal !important;
+    word-wrap: break-word !important;
 }
 
 .comment_info {

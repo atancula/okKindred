@@ -187,6 +187,8 @@ def image_detail(request, image_id):
     #Gets the image detail view
     return render(request, 'gallery/image_tagging.html', {
                                     'image' : im,
+                                    'content_type' : 'gallery.image',
+                                    'object_id' : im.id,
                                 })
 
 
